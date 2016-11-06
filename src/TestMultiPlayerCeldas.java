@@ -22,10 +22,10 @@ public class TestMultiPlayerCeldas
         String sampleOLMCTSController = "controllers.multiPlayer.sampleOLMCTS.Agent";
         String sampleGAController = "controllers.multiPlayer.sampleGA.Agent";
         String humanController = "controllers.multiPlayer.human.Agent";
-        String grupo01Controller = "fiubaceldas.grupo03.Agent";
+        String controllerPropio = "fiubaceldas.grupo03.Agent";
 
         //definir acá los controladores usados para el juego (se necesitan 2 controladores separados por un espacio)
-        String controllers = grupo01Controller + " " + grupo01Controller;
+        String controllers = humanController + " " + humanController;
         //String controllers = sampleOLMCTSController + " " + sampleOLMCTSController;
 
         //ubicación de los juegos disponibles:
