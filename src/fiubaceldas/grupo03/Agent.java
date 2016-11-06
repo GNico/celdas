@@ -1,19 +1,17 @@
 package fiubaceldas.grupo03;
 
-import core.game.Game;
-import core.game.StateObservation;
 import core.game.StateObservationMulti;
 import core.player.AbstractMultiPlayer;
 import juanma.Perception;
 import ontology.Types;
 import ontology.Types.ACTIONS;
-import tools.Direction;
 import tools.ElapsedCpuTimer;
-import tools.Utils;
 
 public class Agent extends AbstractMultiPlayer
 {
-	int id; //this player's ID
+	private int id; //this player's ID
+	private Knowledge knowledge;
+	private String serializationFilename;
 
 	/**
 	 * Public constructor with state observation and time due.
@@ -24,6 +22,10 @@ public class Agent extends AbstractMultiPlayer
 	public Agent(StateObservationMulti so, ElapsedCpuTimer elapsedTimer, int playerID)
 	{
 		id = playerID;
+		serializationFilename = "data/knowledge_" + Integer.toString(id) + ".ser";
+		knowledge = new Knowledge();
+		knowledge.load(serializationFilename);
+
 	}
 
 
@@ -37,13 +39,13 @@ public class Agent extends AbstractMultiPlayer
 	public Types.ACTIONS act(StateObservationMulti stateObs, ElapsedCpuTimer elapsedTimer)
 	{
 		String stateHash = new Perception(stateObs).toString();
-		Types.ACTIONS action = Types.ACTIONS.ACTION_DOWN;
-
+		Types.ACTIONS action = ACTIONS.ACTION_NIL;
 		return action;
 	}
 
-	public void result(StateObservation stateObservation, ElapsedCpuTimer elapsedCpuTimer)
+	public void resultMulti(StateObservationMulti stateObservation, ElapsedCpuTimer elapsedCpuTimer)
 	{
-		//System.out.println("Thanks for playing! " + stateObservation.isAvatarAlive());
+		System.out.println("Storing knowledge to file: "+serializationFilename);
+		knowledge.store(serializationFilename);
 	}
 }

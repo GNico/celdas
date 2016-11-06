@@ -1285,7 +1285,8 @@ public class ArcadeMachine
 
             if (VERBOSE)
                 System.out.println("Controller tear down time: " + timeTaken + " ms.");
-            return true;
+            // Comentado porque corta la iteracion para cada player y rompe en multiplayer
+            //return true;
         }
 
         return true;
