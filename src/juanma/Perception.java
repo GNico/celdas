@@ -111,17 +111,39 @@ public class Perception {
 	}
 	
 	public String toString(){
+		return gridHash();
+	}
+
+	public String gridHash(){
 		StringBuilder sb = new StringBuilder("");
 		if(level!=null){
-			 for(int i=0;i< level.length; i++){
-		        	for(int j=0;j<  level[i].length; j++){
-		        		sb.append(level[i][j]);
-		        	}
-		        	sb.append("\n");
-			 }
+			for(int i=0;i< level.length; i++){
+				for(int j=0;j<  level[i].length; j++){
+					sb.append(level[i][j]);
+				}
+				sb.append("\n");
+			}
 		}
 		return sb.toString();
 	}
-	
+
+	public String boxesHash() {
+		StringBuilder sb = new StringBuilder("");
+		if(level!=null){
+			for(int i=0;i< level.length; i++){
+				for(int j=0;j<  level[i].length; j++) {
+					char c = level[i][j];
+					if (c != 'w' && c != '.' && c != '1'){
+						sb.append('.');
+					}else{
+						sb.append(c);
+					}
+				}
+				sb.append("\n");
+			}
+		}
+		return sb.toString();
+	}
+
 }
 

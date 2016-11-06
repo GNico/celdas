@@ -45,22 +45,12 @@ public class TestMultiPlayerCeldas
         String level1 = gamesPath + gameName + "_lvl" + levelIdx +".txt";
 
         //nombre de archivo en doned se guardaran las acciones ejecutadas. Si es null no guardará nada
-        String recordActionsFile = null;//"actions_" + games[gameIdx] + "_lvl" + levelIdx + "_" + seed + ".txt"; 
-
-        // 1. descomentar la línea de abajo para que el juego inicie para dos jugadores humanos
-//        ArcadeMachine.playOneGameMulti(game, level1, recordActionsFile, seed);
-        
-        //2. Esta línea sirve para iniciar el juego para dos controllers (es decir los agentes inteligentes). Si se quiere que uno de los jugadores
-        //sea humano, cambiar el último paramtro (0) a 1.
-//        ArcadeMachine.runOneGame(game, level1, visuals, controllers, recordActionsFile, seed, 0);
-
-        //3. Esta línea permite repetir un juego desde un archivo de acciones, que se haya grabado previamente
-//        String readActionsFile = recordActionsFile;
-//        ArcadeMachine.replayGame(game, level1, visuals, readActionsFile);
+        String recordActionsFile = null;//"actions_" + games[gameIdx] + "_lvl" + levelIdx + "_" + seed + ".txt";
 
         // 4. Las siguientes líneas permiten jugar un mismo juego en N niveles M veces
-        int M = 5;
+        int M = 50;
         ArcadeMachine.runGames(game, new String[]{level1}, M, controllers, null);
+//        ArcadeMachine.runOneGame(game, level1, visuals, controllers, recordActionsFile, seed, 0);
 
 
     }

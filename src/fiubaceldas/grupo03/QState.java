@@ -3,16 +3,14 @@ package fiubaceldas.grupo03;
 import ontology.Types;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by root on 06/11/2016.
  */
 public class QState implements Serializable {
 
-    public static final double DEFAULT_ACTION_VALUE = 10.0;
+    public static final double DEFAULT_ACTION_VALUE = 50.0;
 
     private HashMap<Types.ACTIONS, Double> actionValues = new HashMap<>();
 
@@ -43,16 +41,30 @@ public class QState implements Serializable {
             System.err.println("No actions for this state");
             return Types.ACTIONS.ACTION_NIL;
         }else{
-            Types.ACTIONS maxAction = null;
-            Double maxActionValue = null;
-            for (Map.Entry<Types.ACTIONS, Double> entry : actionValues.entrySet()) {
-                if(maxActionValue == null || entry.getValue() > maxActionValue) {
-                    maxActionValue = entry.getValue();
-                    maxAction = entry.getKey();
+            if(Math.random() <= 0.01) {
+                Set<Types.ACTIONS> actionses = actionValues.keySet();
+                int size = actionses.size();
+                int item = new Random().nextInt(size);
+                int i = 0;
+                for(Types.ACTIONS act : actionses) {
+                    if (i == item) {
+                        return act;
+                    }
+                    i = i + 1;
                 }
+            }else {
+                Types.ACTIONS maxAction = null;
+                Double maxActionValue = null;
+                for (Map.Entry<Types.ACTIONS, Double> entry : actionValues.entrySet()) {
+                    if(maxActionValue == null || entry.getValue() > maxActionValue) {
+                        maxActionValue = entry.getValue();
+                        maxAction = entry.getKey();
+                    }
+                }
+                return maxAction;
             }
-            return maxAction;
         }
+        return null;
     }
 
     private Double getActionValue(Types.ACTIONS action) {

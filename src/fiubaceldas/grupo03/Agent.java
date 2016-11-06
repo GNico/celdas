@@ -11,8 +11,10 @@ public class Agent extends AbstractMultiPlayer
 	private int playerId; //this player's ID
 	private Knowledge knowledge;
 	private String serializationFilename;
-	private static Double WIN_REWARD = 10.0;
-	private static Double LOSE_REWARD = -10.0;
+	private static Double WIN_REWARD = 100.0;
+	private static Double LOSE_REWARD = -100.0;
+	private String prevBoxesHash = null;
+	private int movesWithoutBoxesChange = 0;
 
 	/**
 	 * Public constructor with state observation and time due.
@@ -39,17 +41,31 @@ public class Agent extends AbstractMultiPlayer
 	 */
 	public Types.ACTIONS act(StateObservationMulti stateObs, ElapsedCpuTimer elapsedTimer)
 	{
-		String stateHash = new Perception(stateObs).toString();
+		Perception perception = new Perception(stateObs);
+		String stateHash = perception.gridHash();
 
 		// Gamescore reward
 		Double gameScore = stateObs.getGameScore(0);
 
 		// Default reward
-		Double reward = -0.1 + gameScore;
+		Double reward = (-1.0 * movesWithoutBoxesChange) + gameScore;
 
+		// If boxes were moved, increase reward
+		String boxesHash = perception.boxesHash();
+		if(!boxesHash.equals(prevBoxesHash)) {
+			if(prevBoxesHash != null) {
+				reward += 100.0;
+				System.out.println("Boxes moved. Moves without boxes change: "+movesWithoutBoxesChange);
+			}
+			prevBoxesHash = boxesHash;
+			movesWithoutBoxesChange = 0;
+		}else{
+			movesWithoutBoxesChange++;
+		}
+
+		Types.ACTIONS action;
 		knowledge.sampleState(stateHash, reward, stateObs.getAvailableActions(playerId));
-
-		Types.ACTIONS action = knowledge.getActionFor(stateHash);
+		action = knowledge.getActionFor(stateHash);
 
 //		System.out.println("Player "+playerId+ " action: "+action);
 
@@ -65,6 +81,11 @@ public class Agent extends AbstractMultiPlayer
 		}else {
 			System.out.println("Winner");
 			knowledge.sampleState(stateHash, WIN_REWARD, stateObs.getAvailableActions(playerId));
+		}
+
+		Double gameScore = stateObs.getGameScore(0);
+		if(gameScore > 0.0) {
+			System.out.println("Non zero score: "+gameScore);
 		}
 
 //		System.out.println("Storing knowledge to file: "+serializationFilename);

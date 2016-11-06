@@ -14,8 +14,8 @@ public class Knowledge implements Serializable{
     private HashMap<String, QState> qtable = new HashMap<>();
     private String prevState = null;
     private Types.ACTIONS prevAction = null;
-    private Double alpha = 0.15d;
-    private Double gamma = 1.0d;
+    private Double alpha = 0.1d;
+    private Double gamma = 0.1d;
 
     private boolean isNewState(String state) {
         return !QTable().containsKey(state);
