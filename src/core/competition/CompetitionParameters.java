@@ -29,7 +29,7 @@ public class CompetitionParameters
     /**
      * Milliseconds allowed for controller tear down.
      */
-    public static int TEAR_DOWN_TIME = 100;
+    public static int TEAR_DOWN_TIME = 1000;
 
     /**
      * Milliseconds allowed for the level generator to generate a level

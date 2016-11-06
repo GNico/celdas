@@ -27,6 +27,8 @@ public class TestMultiPlayerCeldas
         //definir acá los controladores usados para el juego (se necesitan 2 controladores separados por un espacio)
 //        String controllers = randomController + " " + randomController;
         String controllers = controllerPropio + " " + controllerPropio;
+//        String controllers = humanController + " " + controllerPropio;
+//        String controllers = humanController + " " + humanController;
 
         //ubicación de los juegos disponibles:
         String gamesPath = "examples/2player/";
@@ -57,7 +59,7 @@ public class TestMultiPlayerCeldas
 //        ArcadeMachine.replayGame(game, level1, visuals, readActionsFile);
 
         // 4. Las siguientes líneas permiten jugar un mismo juego en N niveles M veces
-        int M = 10;
+        int M = 5;
         ArcadeMachine.runGames(game, new String[]{level1}, M, controllers, null);
 
 
