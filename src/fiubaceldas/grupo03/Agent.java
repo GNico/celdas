@@ -5,6 +5,9 @@ import core.player.AbstractMultiPlayer;
 import juanma.Perception;
 import ontology.Types;
 import tools.ElapsedCpuTimer;
+import tools.Vector2d;
+
+import java.util.ArrayList;
 
 public class Agent extends AbstractMultiPlayer
 {
@@ -48,7 +51,7 @@ public class Agent extends AbstractMultiPlayer
 		Double gameScore = stateObs.getGameScore(0);
 
 		// Default reward
-		Double reward = (-1.0 * movesWithoutBoxesChange) + gameScore;
+		Double reward = (-0.1 * movesWithoutBoxesChange) + gameScore;
 
 		// If boxes were moved, increase reward
 		String boxesHash = perception.boxesHash();
@@ -64,23 +67,55 @@ public class Agent extends AbstractMultiPlayer
 		}
 
 		Types.ACTIONS action;
-		knowledge.sampleState(stateHash, reward, stateObs.getAvailableActions(playerId));
+		knowledge.sampleState(stateHash, reward, getUsefulActions(stateObs));
+//		System.out.println("Evaluating actions for player "+idToString(playerId)+":\n"+stateHash);
 		action = knowledge.getActionFor(stateHash);
+
 
 //		System.out.println("Player "+playerId+ " action: "+action);
 
 		return action;
 	}
 
+	private String idToString(int playerId) {
+		return (playerId == 0 ? "A" :" B");
+	}
+
+	private ArrayList<Types.ACTIONS> getUsefulActions(StateObservationMulti stateObs) {
+		ArrayList<Types.ACTIONS> availableActions = stateObs.getAvailableActions(playerId);
+		Vector2d currentPos = stateObs.getAvatarPosition(playerId);
+		ArrayList<Types.ACTIONS> usefulActions = new ArrayList<>();
+		for(Types.ACTIONS action : availableActions) {
+			// Skip nil action
+			if(action == Types.ACTIONS.ACTION_NIL) continue;
+			// Sheningans para que avance el estado considerando que el otro jugador no hace nada
+			Types.ACTIONS[] acts = new Types.ACTIONS[2];
+			acts[playerId] = action;
+			acts[oppositePlayerId()] = Types.ACTIONS.ACTION_NIL;
+			StateObservationMulti stCopy = stateObs.copy();
+			stCopy.advance(acts);
+			Vector2d nextPos = stCopy.getAvatarPosition(playerId);
+			if(!nextPos.equals(currentPos)) {
+				usefulActions.add(action);
+			}
+		}
+		return usefulActions;
+	}
+
+	private int oppositePlayerId() {
+		return playerId == 0 ? 1 : 0;
+	}
+
 	public void resultMulti(StateObservationMulti stateObs, ElapsedCpuTimer elapsedCpuTimer) {
 		String stateHash = new Perception(stateObs).toString();
+//		System.out.println("Event history size: "+stateObs.getEventsHistory().size());
 
 		if (stateObs.getGameWinner() == Types.WINNER.NO_WINNER || stateObs.getGameWinner() == Types.WINNER.PLAYER_LOSES){
-			System.out.println("No winner");
-			knowledge.sampleState(stateHash, LOSE_REWARD, stateObs.getAvailableActions(playerId));
+//			System.out.println("No winner");
+			knowledge.sampleState(stateHash, LOSE_REWARD, getUsefulActions(stateObs));
 		}else {
-			System.out.println("Winner");
-			knowledge.sampleState(stateHash, WIN_REWARD, stateObs.getAvailableActions(playerId));
+//			System.out.println("Winner");
+			knowledge.sampleState(stateHash, WIN_REWARD, getUsefulActions(stateObs));
 		}
 
 		Double gameScore = stateObs.getGameScore(0);

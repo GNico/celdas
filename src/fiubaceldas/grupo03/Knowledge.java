@@ -14,19 +14,11 @@ public class Knowledge implements Serializable{
     private HashMap<String, QState> qtable = new HashMap<>();
     private String prevState = null;
     private Types.ACTIONS prevAction = null;
-    private Double alpha = 0.1d;
-    private Double gamma = 0.1d;
+    private Double alpha = 0.15d;
+    private Double gamma = 1.0d;
 
     private boolean isNewState(String state) {
         return !QTable().containsKey(state);
-    }
-
-    public Types.ACTIONS getActionFor(String currentState) {
-
-        Types.ACTIONS nextAction = getQStateFor(currentState).getOptimalAction();
-        this.prevState = currentState;
-        this.prevAction = nextAction;
-        return nextAction;
     }
 
     public int numStates() {
@@ -48,6 +40,13 @@ public class Knowledge implements Serializable{
                 qsPrev.update(this.prevAction, nextMax, reward, this.alpha, this.gamma);
             }
         }
+    }
+
+    public Types.ACTIONS getActionFor(String currentState) {
+        Types.ACTIONS nextAction = getQStateFor(currentState).getOptimalAction();
+        this.prevState = currentState;
+        this.prevAction = nextAction;
+        return nextAction;
     }
 
     public void load(String filename) {

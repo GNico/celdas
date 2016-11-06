@@ -19,7 +19,7 @@ public class QState implements Serializable {
             // Init with default
             setActionValue(action, DEFAULT_ACTION_VALUE);
         }
-        setActionValue(Types.ACTIONS.ACTION_NIL, DEFAULT_ACTION_VALUE);
+        setActionValue(Types.ACTIONS.ACTION_NIL, -900.0);
     }
 
     public int numActions() {
@@ -41,30 +41,35 @@ public class QState implements Serializable {
             System.err.println("No actions for this state");
             return Types.ACTIONS.ACTION_NIL;
         }else{
-            if(Math.random() <= 0.01) {
-                Set<Types.ACTIONS> actionses = actionValues.keySet();
-                int size = actionses.size();
-                int item = new Random().nextInt(size);
-                int i = 0;
-                for(Types.ACTIONS act : actionses) {
-                    if (i == item) {
-                        return act;
-                    }
-                    i = i + 1;
-                }
-            }else {
-                Types.ACTIONS maxAction = null;
-                Double maxActionValue = null;
-                for (Map.Entry<Types.ACTIONS, Double> entry : actionValues.entrySet()) {
-                    if(maxActionValue == null || entry.getValue() > maxActionValue) {
-                        maxActionValue = entry.getValue();
-                        maxAction = entry.getKey();
-                    }
-                }
-                return maxAction;
+            return getArgMaxActionValue();
+        }
+    }
+
+    private Types.ACTIONS getArgMaxActionValue() {
+        Types.ACTIONS maxAction = null;
+        Double maxActionValue = null;
+        for (Map.Entry<Types.ACTIONS, Double> entry : actionValues.entrySet()) {
+//            System.out.println("Action: "+entry.getKey()+"\t"+"Value: "+entry.getValue());
+            if(maxActionValue == null || entry.getValue() > maxActionValue) {
+                maxActionValue = entry.getValue();
+                maxAction = entry.getKey();
             }
         }
-        return null;
+        return maxAction;
+    }
+
+    private Types.ACTIONS getRandomAction() {
+        Set<Types.ACTIONS> actions = actionValues.keySet();
+        int size = actions.size();
+        int item = new Random().nextInt(size);
+        int i = 0;
+        for(Types.ACTIONS act : actions) {
+            if (i == item) {
+                return act;
+            }
+            i = i + 1;
+        }
+        return Types.ACTIONS.ACTION_NIL;
     }
 
     private Double getActionValue(Types.ACTIONS action) {
