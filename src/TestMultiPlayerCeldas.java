@@ -39,18 +39,17 @@ public class TestMultiPlayerCeldas
         boolean visuals = true;
         int seed = new Random().nextInt();
 
-        //Qué nivel se utiliz
-        int levelIdx = 0; //level names from 0 to 4 (game_lvlN.txt).
+        //Qué nivel se utiliza
         String game = gamesPath + gameName + ".txt";
-        String level1 = gamesPath + gameName + "_lvl" + levelIdx +".txt";
+        String level = gamesPath + gameName + "_lvl_ez.txt";
 
         //nombre de archivo en doned se guardaran las acciones ejecutadas. Si es null no guardará nada
         String recordActionsFile = null;//"actions_" + games[gameIdx] + "_lvl" + levelIdx + "_" + seed + ".txt";
 
         // 4. Las siguientes líneas permiten jugar un mismo juego en N niveles M veces
-        int M = 50;
-        ArcadeMachine.runGames(game, new String[]{level1}, M, controllers, null);
-//        ArcadeMachine.runOneGame(game, level1, visuals, controllers, recordActionsFile, seed, 0);
+        int M = 10;
+        ArcadeMachine.runGames(game, new String[]{level}, M, controllers, null);
+//        ArcadeMachine.runOneGame(game, level, visuals, controllers, recordActionsFile, seed, 0);
 
 
     }

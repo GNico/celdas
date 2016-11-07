@@ -14,7 +14,7 @@ public class Agent extends AbstractMultiPlayer
 	private int playerId; //this player's ID
 	private Knowledge knowledge;
 	private String serializationFilename;
-	private static Double WIN_REWARD = 100.0;
+	private static Double WIN_REWARD = 10000.0;
 	private static Double LOSE_REWARD = -100.0;
 	private String prevBoxesHash = null;
 	private int movesWithoutBoxesChange = 0;
@@ -47,29 +47,30 @@ public class Agent extends AbstractMultiPlayer
 		Perception perception = new Perception(stateObs);
 		String stateHash = perception.gridHash();
 
-		// Gamescore reward
-		Double gameScore = stateObs.getGameScore(0);
-
-		// Default reward
-		Double reward = (-0.1 * movesWithoutBoxesChange) + gameScore;
-
-		// If boxes were moved, increase reward
-		String boxesHash = perception.boxesHash();
-		if(!boxesHash.equals(prevBoxesHash)) {
-			if(prevBoxesHash != null) {
-				reward += 100.0;
-				System.out.println("Boxes moved. Moves without boxes change: "+movesWithoutBoxesChange);
-			}
-			prevBoxesHash = boxesHash;
-			movesWithoutBoxesChange = 0;
-		}else{
-			movesWithoutBoxesChange++;
-		}
+//		// Gamescore reward
+//		Double gameScore = stateObs.getGameScore(0);
+//
+//		// Default reward
+//		Double reward = (-0.1 * movesWithoutBoxesChange) + gameScore;
+//
+//		// If boxes were moved, increase reward
+//		String boxesHash = perception.boxesHash();
+//		if(!boxesHash.equals(prevBoxesHash)) {
+//			if(prevBoxesHash != null) {
+//				reward += 1.0;
+//				//System.out.println("Boxes moved. Moves without boxes change: "+movesWithoutBoxesChange);
+//			}
+//			prevBoxesHash = boxesHash;
+//			movesWithoutBoxesChange = 0;
+//		}else{
+//			movesWithoutBoxesChange++;
+//		}
 
 		Types.ACTIONS action;
-		knowledge.sampleState(stateHash, reward, getUsefulActions(stateObs));
-//		System.out.println("Evaluating actions for player "+idToString(playerId)+":\n"+stateHash);
+		knowledge.sampleState(stateHash, -1.0, getUsefulActions(stateObs));
+		//System.out.println("Evaluating actions for player "+idToString(playerId)+":\n"+stateHash);
 		action = knowledge.getActionFor(stateHash);
+		//System.out.println("Player "+idToString(playerId)+" took action "+action+"\n");
 
 
 //		System.out.println("Player "+playerId+ " action: "+action);
@@ -82,7 +83,9 @@ public class Agent extends AbstractMultiPlayer
 	}
 
 	private ArrayList<Types.ACTIONS> getUsefulActions(StateObservationMulti stateObs) {
-		ArrayList<Types.ACTIONS> availableActions = stateObs.getAvailableActions(playerId);
+		Types.ACTIONS availableActions[] = new Types.ACTIONS[]{
+				Types.ACTIONS.ACTION_DOWN,Types.ACTIONS.ACTION_UP,
+				Types.ACTIONS.ACTION_LEFT, Types.ACTIONS.ACTION_RIGHT};
 		Vector2d currentPos = stateObs.getAvatarPosition(playerId);
 		ArrayList<Types.ACTIONS> usefulActions = new ArrayList<>();
 		for(Types.ACTIONS action : availableActions) {
@@ -99,6 +102,10 @@ public class Agent extends AbstractMultiPlayer
 				usefulActions.add(action);
 			}
 		}
+		String stateHash = new Perception(stateObs).gridHash();
+		//System.out.println("Evaluating useful actions for player "+idToString(playerId)+":\n"+stateHash);
+		//System.out.println("Available actions: "+availableActions);
+		//System.out.println("Useful actions: "+usefulActions);
 		return usefulActions;
 	}
 
@@ -120,11 +127,11 @@ public class Agent extends AbstractMultiPlayer
 
 		Double gameScore = stateObs.getGameScore(0);
 		if(gameScore > 0.0) {
-			System.out.println("Non zero score: "+gameScore);
+			System.out.println("------------------------------------------ Score: "+gameScore);
 		}
 
 //		System.out.println("Storing knowledge to file: "+serializationFilename);
-		System.out.println("Num states: "+knowledge.numStates());
+		//System.out.println("Num states: "+knowledge.numStates());
 		knowledge.store(serializationFilename);
 	}
 }

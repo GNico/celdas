@@ -19,7 +19,7 @@ public class QState implements Serializable {
             // Init with default
             setActionValue(action, DEFAULT_ACTION_VALUE);
         }
-        setActionValue(Types.ACTIONS.ACTION_NIL, -900.0);
+        setActionValue(Types.ACTIONS.ACTION_NIL, -50.0);
     }
 
     public int numActions() {
@@ -49,7 +49,7 @@ public class QState implements Serializable {
         Types.ACTIONS maxAction = null;
         Double maxActionValue = null;
         for (Map.Entry<Types.ACTIONS, Double> entry : actionValues.entrySet()) {
-//            System.out.println("Action: "+entry.getKey()+"\t"+"Value: "+entry.getValue());
+            //System.out.println("Action: "+entry.getKey()+"\t"+"Value: "+entry.getValue());
             if(maxActionValue == null || entry.getValue() > maxActionValue) {
                 maxActionValue = entry.getValue();
                 maxAction = entry.getKey();
@@ -73,11 +73,11 @@ public class QState implements Serializable {
     }
 
     private Double getActionValue(Types.ACTIONS action) {
-        Double actionValue =  actionValues.get(action);
+        Double actionValue = actionValues.get(action);
         if(actionValue == null) {
-            actionValue = 0.0d;
             System.err.println("Requesting missing action: "+action);
             actionValues.put(action, actionValue);
+            actionValue = actionValues.get(action);
         }
         return actionValue;
     }
