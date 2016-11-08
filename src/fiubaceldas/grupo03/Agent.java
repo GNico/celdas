@@ -52,21 +52,22 @@ public class Agent extends AbstractMultiPlayer
 			String stateHash = perception.gridHash();
 			try {
 				// Check if we have visited the same state twice in this game
-				if(stateObs.getAvatarLastAction(playerId) != Types.ACTIONS.ACTION_NIL) {
+//				if(stateObs.getAvatarLastAction(playerId) != Types.ACTIONS.ACTION_NIL) {
 					if (visitedStates.contains(stateHash)) {
 						throw new IllegalStateException("Visited same state twice. States count: " + visitedStates.size());
 					} else {
 						visitedStates.add(stateHash);
 					}
-				}
+//				}
 				Double reward = -1.0;
 				knowledge.sampleState(stateHash, reward, realAvailableActions(stateObs));
 
-				//System.out.println("Evaluating actions for player "+idToString(playerId)+":\n"+stateHash);
+//				System.out.println("Evaluating actions for player "+idToString(playerId)+":\n"+stateHash);
 				action = knowledge.getActionFor(stateHash, stateObs.getAvatarLastAction(oppositePlayerId()));
+//				System.out.println("Took action:  "+action);
 			}catch(IllegalStateException e) {
 				// Pretend the game has ended in a loss
-				System.out.println("Deadlock: "+e.getMessage());
+//				System.out.println("Deadlock: "+e.getMessage());
 				gameLostUpdate(stateObs, stateHash);
 				stillAlive = false;
 			}
@@ -77,6 +78,11 @@ public class Agent extends AbstractMultiPlayer
 		}else{
 			//System.out.println("Forced deadlock, waiting for timeout");
 		}
+		try {
+			Thread.sleep(0);
+		} catch (InterruptedException e) {
+			System.err.println("Nada boludo, no se te va a morir.");
+		}
 		return action;
 	}
 
@@ -85,15 +91,13 @@ public class Agent extends AbstractMultiPlayer
 	}
 
 	private ArrayList<Types.ACTIONS> realAvailableActions(StateObservationMulti stateObs) {
-		Types.ACTIONS availableActions[] = new Types.ACTIONS[]{
+		Types.ACTIONS allMovementActions[] = new Types.ACTIONS[]{
 				Types.ACTIONS.ACTION_DOWN,Types.ACTIONS.ACTION_UP,
 				Types.ACTIONS.ACTION_LEFT, Types.ACTIONS.ACTION_RIGHT};
 		Vector2d currentPos = stateObs.getAvatarPosition(playerId);
 		ArrayList<Types.ACTIONS> realActions = new ArrayList<>();
-		for(Types.ACTIONS action : availableActions) {
-			// Skip nil action
-			if(action == Types.ACTIONS.ACTION_NIL) continue;
-			// Sheningans para que avance el estado considerando que el otro jugador no hace nada
+		for(Types.ACTIONS action : allMovementActions) {
+			// Shenaningans para que avance el estado considerando que el otro jugador no hace nada
 			Types.ACTIONS[] acts = new Types.ACTIONS[2];
 			acts[playerId] = action;
 			acts[oppositePlayerId()] = Types.ACTIONS.ACTION_NIL;
@@ -129,14 +133,12 @@ public class Agent extends AbstractMultiPlayer
 			}
 		}
 
-//		Double gameScore = stateObs.getGameScore(0);
-//		if(gameScore > 0.0) {
-//			System.out.println("------------------------------------------ Score: "+gameScore);
-//		}
-
 //		System.out.println("Storing knowledge to file: "+serializationFilename);
-		System.out.println("Num states: "+knowledge.numStates());
+//		System.out.println("Num states: "+knowledge.numStates());
 		knowledge.store(serializationFilename);
+
+		Double gameScore = stateObs.getGameScore(0);
+		System.out.println("------------------------------------------ Score: "+gameScore);
 	}
 
 	private void gameLostUpdate(StateObservationMulti stateObs, String stateHash) {

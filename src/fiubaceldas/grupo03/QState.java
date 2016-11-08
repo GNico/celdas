@@ -44,7 +44,7 @@ public class QState implements Serializable {
         Double maxActionValue = null;
         for (Map.Entry<Types.ACTIONS, Double> entry : actionValues.entrySet()) {
             if(!canBeNil && entry.getKey() == Types.ACTIONS.ACTION_NIL) continue;
-            //System.out.println("Action: "+entry.getKey()+"\t"+"Value: "+entry.getValue());
+//            System.out.println("Action: "+entry.getKey()+"\t"+"Value: "+entry.getValue());
             if(maxActionValue == null || entry.getValue() > maxActionValue) {
                 maxActionValue = entry.getValue();
                 maxAction = entry.getKey();
@@ -87,7 +87,7 @@ public class QState implements Serializable {
     public void update(Types.ACTIONS action, Double nextStateMax, Double reward, Double alpha, Double gamma) {
         Double oldActionValue = getActionValue(action);
         Double delta = reward + (gamma * nextStateMax) - oldActionValue;
-        setActionValue(action, (oldActionValue + oldActionValue * delta * alpha));
+        setActionValue(action, (oldActionValue + delta * alpha));
     }
 
 }

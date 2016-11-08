@@ -35,10 +35,9 @@ public class Knowledge implements Serializable{
         }
         if(this.prevState != null && this.prevAction != null) {
             QState qsPrev = getQStateFor(this.prevState);
-            if(qsPrev != null) {
-                Double nextMax = this.getQStateFor(state).getMaxActionValue();
-                qsPrev.update(this.prevAction, nextMax, reward, this.alpha, this.gamma);
-            }
+            if(qsPrev == null) throw new RuntimeException("Prev state has no QState");
+            Double nextMax = this.getQStateFor(state).getMaxActionValue();
+            qsPrev.update(this.prevAction, nextMax, reward, this.alpha, this.gamma);
         }
         this.prevState = state;
     }
@@ -53,9 +52,11 @@ public class Knowledge implements Serializable{
     public void load(String filename) {
         try {
             FileInputStream fIn = new FileInputStream(filename);
-            ObjectInputStream out = new ObjectInputStream(fIn);
-            Knowledge k = (Knowledge)out.readObject();
+            ObjectInputStream in = new ObjectInputStream(fIn);
+            Knowledge k = (Knowledge)in.readObject();
             this.loadFrom(k);
+            in.close();
+            fIn.close();
         }catch(Exception e) {
             System.err.println("Error loading serialized knowledge from "+filename+": "+e.getMessage());
         }
@@ -78,7 +79,8 @@ public class Knowledge implements Serializable{
             FileOutputStream fOut = new FileOutputStream(filename);
             ObjectOutputStream out = new ObjectOutputStream(fOut);
             out.writeObject(this);
-            out.flush();
+            out.close();
+            fOut.close();
         }catch(Exception e) {
             System.err.println("Error storing serialized knowledge to "+filename+": "+e.getMessage());
         }
