@@ -8,16 +8,18 @@ import tools.ElapsedCpuTimer;
 import tools.Vector2d;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Agent extends AbstractMultiPlayer
 {
 	private int playerId; //this player's ID
 	private Knowledge knowledge;
 	private String serializationFilename;
-	private static Double WIN_REWARD = 10000.0;
-	private static Double LOSE_REWARD = -100.0;
-	private String prevBoxesHash = null;
-	private int movesWithoutBoxesChange = 0;
+	private static Double WIN_REWARD = 1000.0;
+	private static Double LOSE_REWARD = -1000.0;
+	private boolean stillAlive = true;
+	private Set<String> visitedStates = new HashSet<>();
 
 	/**
 	 * Public constructor with state observation and time due.
@@ -44,37 +46,37 @@ public class Agent extends AbstractMultiPlayer
 	 */
 	public Types.ACTIONS act(StateObservationMulti stateObs, ElapsedCpuTimer elapsedTimer)
 	{
-		Perception perception = new Perception(stateObs);
-		String stateHash = perception.gridHash();
+		Types.ACTIONS action = Types.ACTIONS.ACTION_NIL;
+		if(stillAlive) {
+			Perception perception = new Perception(stateObs);
+			String stateHash = perception.gridHash();
+			try {
+				// Check if we have visited the same state twice in this game
+				if(stateObs.getAvatarLastAction(playerId) != Types.ACTIONS.ACTION_NIL) {
+					if (visitedStates.contains(stateHash)) {
+						throw new IllegalStateException("Visited same state twice. States count: " + visitedStates.size());
+					} else {
+						visitedStates.add(stateHash);
+					}
+				}
+				Double reward = -1.0;
+				knowledge.sampleState(stateHash, reward, realAvailableActions(stateObs));
 
-//		// Gamescore reward
-//		Double gameScore = stateObs.getGameScore(0);
-//
-//		// Default reward
-//		Double reward = (-0.1 * movesWithoutBoxesChange) + gameScore;
-//
-//		// If boxes were moved, increase reward
-//		String boxesHash = perception.boxesHash();
-//		if(!boxesHash.equals(prevBoxesHash)) {
-//			if(prevBoxesHash != null) {
-//				reward += 1.0;
-//				//System.out.println("Boxes moved. Moves without boxes change: "+movesWithoutBoxesChange);
-//			}
-//			prevBoxesHash = boxesHash;
-//			movesWithoutBoxesChange = 0;
-//		}else{
-//			movesWithoutBoxesChange++;
-//		}
-
-		Types.ACTIONS action;
-		knowledge.sampleState(stateHash, -1.0, getUsefulActions(stateObs));
-		//System.out.println("Evaluating actions for player "+idToString(playerId)+":\n"+stateHash);
-		action = knowledge.getActionFor(stateHash);
-		//System.out.println("Player "+idToString(playerId)+" took action "+action+"\n");
+				//System.out.println("Evaluating actions for player "+idToString(playerId)+":\n"+stateHash);
+				action = knowledge.getActionFor(stateHash, stateObs.getAvatarLastAction(oppositePlayerId()));
+			}catch(IllegalStateException e) {
+				// Pretend the game has ended in a loss
+				System.out.println("Deadlock: "+e.getMessage());
+				gameLostUpdate(stateObs, stateHash);
+				stillAlive = false;
+			}
+			//System.out.println("Player "+idToString(playerId)+" took action "+action+"\n");
 
 
 //		System.out.println("Player "+playerId+ " action: "+action);
-
+		}else{
+			//System.out.println("Forced deadlock, waiting for timeout");
+		}
 		return action;
 	}
 
@@ -82,12 +84,12 @@ public class Agent extends AbstractMultiPlayer
 		return (playerId == 0 ? "A" :" B");
 	}
 
-	private ArrayList<Types.ACTIONS> getUsefulActions(StateObservationMulti stateObs) {
+	private ArrayList<Types.ACTIONS> realAvailableActions(StateObservationMulti stateObs) {
 		Types.ACTIONS availableActions[] = new Types.ACTIONS[]{
 				Types.ACTIONS.ACTION_DOWN,Types.ACTIONS.ACTION_UP,
 				Types.ACTIONS.ACTION_LEFT, Types.ACTIONS.ACTION_RIGHT};
 		Vector2d currentPos = stateObs.getAvatarPosition(playerId);
-		ArrayList<Types.ACTIONS> usefulActions = new ArrayList<>();
+		ArrayList<Types.ACTIONS> realActions = new ArrayList<>();
 		for(Types.ACTIONS action : availableActions) {
 			// Skip nil action
 			if(action == Types.ACTIONS.ACTION_NIL) continue;
@@ -99,14 +101,14 @@ public class Agent extends AbstractMultiPlayer
 			stCopy.advance(acts);
 			Vector2d nextPos = stCopy.getAvatarPosition(playerId);
 			if(!nextPos.equals(currentPos)) {
-				usefulActions.add(action);
+				realActions.add(action);
 			}
 		}
-		String stateHash = new Perception(stateObs).gridHash();
+		//String stateHash = new Perception(stateObs).gridHash();
 		//System.out.println("Evaluating useful actions for player "+idToString(playerId)+":\n"+stateHash);
 		//System.out.println("Available actions: "+availableActions);
 		//System.out.println("Useful actions: "+usefulActions);
-		return usefulActions;
+		return realActions;
 	}
 
 	private int oppositePlayerId() {
@@ -114,24 +116,30 @@ public class Agent extends AbstractMultiPlayer
 	}
 
 	public void resultMulti(StateObservationMulti stateObs, ElapsedCpuTimer elapsedCpuTimer) {
-		String stateHash = new Perception(stateObs).toString();
-//		System.out.println("Event history size: "+stateObs.getEventsHistory().size());
+		if(stillAlive) {
+			String stateHash = new Perception(stateObs).toString();
+			// System.out.println("Event history size: "+stateObs.getEventsHistory().size());
 
-		if (stateObs.getGameWinner() == Types.WINNER.NO_WINNER || stateObs.getGameWinner() == Types.WINNER.PLAYER_LOSES){
-//			System.out.println("No winner");
-			knowledge.sampleState(stateHash, LOSE_REWARD, getUsefulActions(stateObs));
-		}else {
-//			System.out.println("Winner");
-			knowledge.sampleState(stateHash, WIN_REWARD, getUsefulActions(stateObs));
+			if (stateObs.getGameWinner() == Types.WINNER.NO_WINNER || stateObs.getGameWinner() == Types.WINNER.PLAYER_LOSES) {
+//				System.out.println("No winner");
+				gameLostUpdate(stateObs, stateHash);
+			} else {
+				System.out.println("Winner");
+				knowledge.sampleState(stateHash, WIN_REWARD, realAvailableActions(stateObs));
+			}
 		}
 
-		Double gameScore = stateObs.getGameScore(0);
-		if(gameScore > 0.0) {
-			System.out.println("------------------------------------------ Score: "+gameScore);
-		}
+//		Double gameScore = stateObs.getGameScore(0);
+//		if(gameScore > 0.0) {
+//			System.out.println("------------------------------------------ Score: "+gameScore);
+//		}
 
 //		System.out.println("Storing knowledge to file: "+serializationFilename);
-		//System.out.println("Num states: "+knowledge.numStates());
+		System.out.println("Num states: "+knowledge.numStates());
 		knowledge.store(serializationFilename);
+	}
+
+	private void gameLostUpdate(StateObservationMulti stateObs, String stateHash) {
+		knowledge.sampleState(stateHash, LOSE_REWARD, realAvailableActions(stateObs));
 	}
 }

@@ -14,12 +14,12 @@ public class CompetitionParameters
     /**
      * Milliseconds allowed per controller action.
      */
-    public static int ACTION_TIME = 40;
+    public static int ACTION_TIME = 1000;
 
     /**
      * Milliseconds for controller disqualification, if it returns an action after this time.
      */
-    public static int ACTION_TIME_DISQ = 50;
+    public static int ACTION_TIME_DISQ = 1000;
 
     /**
      * Milliseconds allowed for controller initialization.
@@ -66,7 +66,7 @@ public class CompetitionParameters
     /**
      * Max time a game can run
      */
-    public static int MAX_TIMESTEPS = 100;
+    public static int MAX_TIMESTEPS = 50;
 
     /**
      * Terminates the program when the playing window is closed

@@ -10,7 +10,7 @@ import java.util.*;
  */
 public class QState implements Serializable {
 
-    public static final double DEFAULT_ACTION_VALUE = 50.0;
+    public static final double DEFAULT_ACTION_VALUE = 100.0;
 
     private HashMap<Types.ACTIONS, Double> actionValues = new HashMap<>();
 
@@ -36,24 +36,22 @@ public class QState implements Serializable {
         return maxActionValue;
     }
 
-    public Types.ACTIONS getOptimalAction() {
+    public Types.ACTIONS getArgMaxActionValue(boolean canBeNil) {
         if(actionValues.isEmpty()) {
-            System.err.println("No actions for this state");
-            return Types.ACTIONS.ACTION_NIL;
-        }else{
-            return getArgMaxActionValue();
+            throw new RuntimeException("No actions for this state");
         }
-    }
-
-    private Types.ACTIONS getArgMaxActionValue() {
         Types.ACTIONS maxAction = null;
         Double maxActionValue = null;
         for (Map.Entry<Types.ACTIONS, Double> entry : actionValues.entrySet()) {
+            if(!canBeNil && entry.getKey() == Types.ACTIONS.ACTION_NIL) continue;
             //System.out.println("Action: "+entry.getKey()+"\t"+"Value: "+entry.getValue());
             if(maxActionValue == null || entry.getValue() > maxActionValue) {
                 maxActionValue = entry.getValue();
                 maxAction = entry.getKey();
             }
+        }
+        if(maxAction == null) {
+            throw new IllegalStateException("Can't be nil but only action is nil");
         }
         return maxAction;
     }
@@ -76,7 +74,7 @@ public class QState implements Serializable {
         Double actionValue = actionValues.get(action);
         if(actionValue == null) {
             System.err.println("Requesting missing action: "+action);
-            actionValues.put(action, actionValue);
+            actionValues.put(action, DEFAULT_ACTION_VALUE);
             actionValue = actionValues.get(action);
         }
         return actionValue;
