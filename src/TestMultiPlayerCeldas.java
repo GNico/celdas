@@ -1,6 +1,7 @@
 import java.util.Random;
 
 import core.ArcadeMachine;
+import fiubaceldas.grupo03.KnowledgeDB;
 
 /**
  * Created with IntelliJ IDEA.
@@ -47,10 +48,10 @@ public class TestMultiPlayerCeldas
         String recordActionsFile = null;//"actions_" + games[gameIdx] + "_lvl" + levelIdx + "_" + seed + ".txt";
 
         // 4. Las siguientes líneas permiten jugar un mismo juego en N niveles M veces
-        int M = 5000;
+        int M = 1000;
 //        ArcadeMachine.runGames(game, new String[]{level}, M, controllers, null);
         ArcadeMachine.runOneGame(game, level, visuals, controllers, recordActionsFile, seed, 0);
-
+        KnowledgeDB.instance().toDisk();
 
     }
 }

@@ -73,7 +73,7 @@ public class QState implements Serializable {
     private Double getActionValue(Types.ACTIONS action) {
         Double actionValue = actionValues.get(action);
         if(actionValue == null) {
-            System.err.println("Requesting missing action: "+action);
+            //System.err.println("Requesting missing action: "+action);
             actionValues.put(action, DEFAULT_ACTION_VALUE);
             actionValue = actionValues.get(action);
         }

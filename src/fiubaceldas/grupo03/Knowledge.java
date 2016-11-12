@@ -49,19 +49,6 @@ public class Knowledge implements Serializable{
         return nextAction;
     }
 
-    public void load(String filename) {
-        try {
-            FileInputStream fIn = new FileInputStream(filename);
-            ObjectInputStream in = new ObjectInputStream(fIn);
-            Knowledge k = (Knowledge)in.readObject();
-            this.loadFrom(k);
-            in.close();
-            fIn.close();
-        }catch(Exception e) {
-            System.err.println("Error loading serialized knowledge from "+filename+": "+e.getMessage());
-        }
-    }
-
     private void setQTable(HashMap<String, QState> qtable) {
         this.qtable = qtable;
     }
@@ -70,20 +57,7 @@ public class Knowledge implements Serializable{
         return this.qtable;
     }
 
-    private void loadFrom(Knowledge k) {
-        setQTable(k.QTable());
+    public void loadFrom(Knowledge fromFile) {
+        setQTable(fromFile.QTable());
     }
-
-    public void store(String filename)  {
-        try {
-            FileOutputStream fOut = new FileOutputStream(filename);
-            ObjectOutputStream out = new ObjectOutputStream(fOut);
-            out.writeObject(this);
-            out.close();
-            fOut.close();
-        }catch(Exception e) {
-            System.err.println("Error storing serialized knowledge to "+filename+": "+e.getMessage());
-        }
-    }
-
 }

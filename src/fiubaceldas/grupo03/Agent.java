@@ -30,10 +30,11 @@ public class Agent extends AbstractMultiPlayer
 	public Agent(StateObservationMulti so, ElapsedCpuTimer elapsedTimer, int playerID)
 	{
 		playerId = playerID;
-		serializationFilename = "data/knowledge_" + playerId + ".ser";
-		knowledge = new Knowledge();
-		knowledge.load(serializationFilename);
-
+		serializationFilename = "data/knowledge_" + idToString(playerId) + ".ser";
+		knowledge = KnowledgeDB.instance().load(serializationFilename);
+		if(knowledge == null) {
+			knowledge = new Knowledge();
+		}
 	}
 
 
@@ -137,7 +138,7 @@ public class Agent extends AbstractMultiPlayer
 
 //		System.out.println("Storing knowledge to file: "+serializationFilename);
 //		System.out.println("Num states: "+knowledge.numStates());
-		knowledge.store(serializationFilename);
+		KnowledgeDB.instance().store(serializationFilename, knowledge);
 //		System.out.println("------------------------------------------ Score: "+gameScore);
 	}
 
