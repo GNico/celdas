@@ -68,7 +68,7 @@ public class Agent extends AbstractMultiPlayer
 			}catch(IllegalStateException e) {
 				// Pretend the game has ended in a loss
 //				System.out.println("Deadlock: "+e.getMessage());
-				gameLostUpdate(stateObs, stateHash);
+				gameLostUpdate(stateObs, stateHash, 0.0d);
 				stillAlive = false;
 			}
 			//System.out.println("Player "+idToString(playerId)+" took action "+action+"\n");
@@ -79,9 +79,10 @@ public class Agent extends AbstractMultiPlayer
 			//System.out.println("Forced deadlock, waiting for timeout");
 		}
 		try {
+			Thread.sleep(250);
 			Thread.sleep(0);
 		} catch (InterruptedException e) {
-			System.err.println("Nada boludo, no se te va a morir.");
+			// Nothing
 		}
 		return action;
 	}
@@ -120,13 +121,14 @@ public class Agent extends AbstractMultiPlayer
 	}
 
 	public void resultMulti(StateObservationMulti stateObs, ElapsedCpuTimer elapsedCpuTimer) {
+		Double gameScore = stateObs.getGameScore(0);
 		if(stillAlive) {
 			String stateHash = new Perception(stateObs).toString();
 			// System.out.println("Event history size: "+stateObs.getEventsHistory().size());
 
 			if (stateObs.getGameWinner() == Types.WINNER.NO_WINNER || stateObs.getGameWinner() == Types.WINNER.PLAYER_LOSES) {
 //				System.out.println("No winner");
-				gameLostUpdate(stateObs, stateHash);
+				gameLostUpdate(stateObs, stateHash, gameScore);
 			} else {
 				System.out.println("Winner");
 				knowledge.sampleState(stateHash, WIN_REWARD, realAvailableActions(stateObs));
@@ -136,12 +138,10 @@ public class Agent extends AbstractMultiPlayer
 //		System.out.println("Storing knowledge to file: "+serializationFilename);
 //		System.out.println("Num states: "+knowledge.numStates());
 		knowledge.store(serializationFilename);
-
-		Double gameScore = stateObs.getGameScore(0);
-		System.out.println("------------------------------------------ Score: "+gameScore);
+//		System.out.println("------------------------------------------ Score: "+gameScore);
 	}
 
-	private void gameLostUpdate(StateObservationMulti stateObs, String stateHash) {
-		knowledge.sampleState(stateHash, LOSE_REWARD, realAvailableActions(stateObs));
+	private void gameLostUpdate(StateObservationMulti stateObs, String stateHash, Double score) {
+		knowledge.sampleState(stateHash, LOSE_REWARD + (WIN_REWARD * 0.25d * score), realAvailableActions(stateObs));
 	}
 }
