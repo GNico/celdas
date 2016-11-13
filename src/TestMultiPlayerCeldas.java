@@ -51,7 +51,7 @@ public class TestMultiPlayerCeldas
         int M = 1000;
 //        ArcadeMachine.runGames(game, new String[]{level}, M, controllers, null);
         ArcadeMachine.runOneGame(game, level, visuals, controllers, recordActionsFile, seed, 0);
-        KnowledgeDB.instance().toDisk();
+//        KnowledgeDB.instance().toDisk();
 
     }
 }

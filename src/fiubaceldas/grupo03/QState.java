@@ -19,7 +19,7 @@ public class QState implements Serializable {
             // Init with default
             setActionValue(action, DEFAULT_ACTION_VALUE);
         }
-        setActionValue(Types.ACTIONS.ACTION_NIL, -50.0);
+        setActionValue(Types.ACTIONS.ACTION_NIL, 50.0);
     }
 
     public int numActions() {
