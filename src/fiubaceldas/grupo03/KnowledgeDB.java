@@ -1,9 +1,13 @@
 package fiubaceldas.grupo03;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+import ontology.Types;
+
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,6 +16,7 @@ import java.util.Map;
  */
 public class KnowledgeDB {
 
+    static Gson gson = new GsonBuilder().setPrettyPrinting().create();
     static KnowledgeDB instance;
     HashMap<String, Knowledge> cache = new HashMap<>();
 
@@ -40,13 +45,11 @@ public class KnowledgeDB {
 
     private Knowledge loadFromFile(String filename) {
         try {
-            FileInputStream fIn = new FileInputStream(filename);
-            ObjectInputStream in = new ObjectInputStream(fIn);
-            Knowledge fromFile = (Knowledge)in.readObject();
-            in.close();
-            fIn.close();
+            String jsonString = new String(Files.readAllBytes(Paths.get(filename)));
+            Map<String, QState> json = gson.fromJson(jsonString, new TypeToken<Map<String, QState>>(){}.getType());
+            HashMap<String, QState> table = new HashMap<String, QState>(json);
             Knowledge k = new Knowledge();
-            k.loadFrom(fromFile);
+            k.setQTable(table);
             return k;
         }catch(Exception e) {
             System.err.println("Error loading serialized knowledge from "+filename+": "+e.getMessage());
@@ -71,11 +74,10 @@ public class KnowledgeDB {
 
     public void storeToDisk(String filename, Knowledge k)  {
         try {
-            FileOutputStream fOut = new FileOutputStream(filename);
-            ObjectOutputStream out = new ObjectOutputStream(fOut);
-            out.writeObject(k);
+            BufferedWriter out = new BufferedWriter(new FileWriter(filename));
+            String text = gson.toJson(k.QTable());
+            out.write(text);
             out.close();
-            fOut.close();
         }catch(Exception e) {
             System.err.println("Error storing serialized knowledge to "+filename+": "+e.getMessage());
         }

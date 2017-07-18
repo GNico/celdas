@@ -30,7 +30,7 @@ public class Agent extends AbstractMultiPlayer
 	public Agent(StateObservationMulti so, ElapsedCpuTimer elapsedTimer, int playerID)
 	{
 		playerId = playerID;
-		serializationFilename = "data/knowledge_" + idToString(playerId) + ".ser";
+		serializationFilename = "data/knowledge_" + idToString(playerId) + ".json";
 		knowledge = KnowledgeDB.instance().load(serializationFilename);
 		if(knowledge == null) {
 			knowledge = new Knowledge();
@@ -89,7 +89,7 @@ public class Agent extends AbstractMultiPlayer
 	}
 
 	private String idToString(int playerId) {
-		return (playerId == 0 ? "A" :" B");
+		return (playerId == 0 ? "A" : "B");
 	}
 
 	private ArrayList<Types.ACTIONS> realAvailableActions(StateObservationMulti stateObs) {

@@ -49,9 +49,9 @@ public class TestMultiPlayerCeldas
 
         // 4. Las siguientes líneas permiten jugar un mismo juego en N niveles M veces
         int M = 1000;
-//        ArcadeMachine.runGames(game, new String[]{level}, M, controllers, null);
+        //ArcadeMachine.runGames(game, new String[]{level}, M, controllers, null);
         ArcadeMachine.runOneGame(game, level, visuals, controllers, recordActionsFile, seed, 0);
-//        KnowledgeDB.instance().toDisk();
+        //KnowledgeDB.instance().toDisk();
 
     }
 }

@@ -49,15 +49,12 @@ public class Knowledge implements Serializable{
         return nextAction;
     }
 
-    private void setQTable(HashMap<String, QState> qtable) {
+    public void setQTable(HashMap<String, QState> qtable) {
         this.qtable = qtable;
     }
 
-    private HashMap<String, QState> QTable() {
+    public HashMap<String, QState> QTable() {
         return this.qtable;
     }
 
-    public void loadFrom(Knowledge fromFile) {
-        setQTable(fromFile.QTable());
-    }
 }
